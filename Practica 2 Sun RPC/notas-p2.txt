@@ -1,0 +1,25 @@
+Practica 2: Módulo I
+
+Ejemplo: https://www.youtube.com/watch?v=oTXeNnhS9EY&ab_channel=NelsonLozano
+
+
+para añadir la biblioteca rpc, añadir al makefile:
+
+instalar libtirpc
+añadir la biblioteca al makefile
+
+ -I /usr/include/tirpc
+
+cabeceras ruta estándar: /usr/include
+añadir la ruta de /usr/include/tirpc
+
+¡¡ ver dp 25 !!
+
+Ejercicio a entregar:
+Calculadora (como minimo + - * / [OJO AL DIVIDIR POR CERO,  AVISAR DE QUE NO]) -> 6pt
+Opcional:
+Paso de parámetros estructura compleja (array)
+Operaciones con vectores, matrices...
+(ver 3a opc más compleja)
+
+Entrega en dos semanas: 28 marzo

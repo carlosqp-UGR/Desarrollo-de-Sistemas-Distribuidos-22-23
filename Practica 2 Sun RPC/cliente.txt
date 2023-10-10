@@ -1,0 +1,9 @@
+calling server: localhost with the following operation 2 + 8
+2 + 8 = 10
+calling server: localhost with the following operation 2 - 10
+2 - 10 = -8
+calling server: localhost with the following operation 2 x 50
+2 x 50 = 100
+calling server: localhost with the following operation 2 / 9
+2 / 9 = 0.22
+stop: math error, cannot divide by 0

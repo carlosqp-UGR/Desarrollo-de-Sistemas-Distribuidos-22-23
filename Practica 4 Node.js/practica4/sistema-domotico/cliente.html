@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+	<title>Cliente</title>
+	<style>
+		body {
+			background-color: #f2f2f2;
+		}
+
+		.container {
+			display: flex;
+			flex-wrap: wrap;
+            flex-direction: column;
+            flex-basis: 120;
+            align-items: center;
+			justify-content: center;
+            /* max-width: 1200px; */
+		}
+
+		.box {
+			background-color: #ffffff;
+			border-radius: 10px;
+			box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
+			margin: 20px;
+			padding: 20px;
+			text-align: center;
+			width: 85%;
+		}
+
+		.box h2 {
+			font-size: 24px;
+			margin-bottom: 20px;
+			text-align: center;
+		}
+
+		.box span {
+			font-size: 20px;
+		}
+
+        .sensores {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .sensor {
+            padding: 5px;
+            border-radius: 5px;
+            background-color: #f2f2f2;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
+            width: 45%;
+        }
+
+        .sensor label {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .sensor span {
+            font-size: 18px;
+        }
+
+		button {
+			background-color: #4285f4;
+			border: none;
+			border-radius: 5px;
+			color: #ffffff;
+			cursor: pointer;
+			font-size: 18px;
+			margin-top: 10px;
+			padding: 10px 20px;
+			transition: background-color 0.3s ease-in-out;
+		}
+
+		button:hover, button:focus {
+			background-color: #1351ad;
+			outline: none;
+		}
+
+		button:active {
+			background-color: #0c3873;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+        <div class="box">
+            <h2>Sensores</h2>
+            <div class="sensores">
+                <div class="sensor">
+                    <label>Temperatura (°C):</label>
+                    <span id="temperatura"></span>
+                </div>
+                <div class="sensor">
+                    <label>Luminosidad (Lux):</label>
+                    <span id="luminosidad"></span>
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="box">
+            <h2>Motores</h2>
+            <div style="display:flex; flex-direction: row;">
+                <div class="box" style="flex-basis: 50%;">
+                    <h3>A/C</h3>
+                    <button onclick="subirAC()">Subir Tª</button>
+                    <button onclick="bajarAC()">Bajar Tª</button>
+                </div>
+                <div class="box" style="flex-basis: 50%;">
+                    <h3>Persiana</h3>
+                    <button onclick="subirPersiana()">Subir</button>
+                    <button onclick="bajarPersiana()">Bajar</button>
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="box">
+			<h2>Avisos del Agente</h2>
+			<span id="avisos"></span>
+		</div>
+	</div>
+
+    <!-- Aquí va el script con la lógica del cliente -->
+    <script src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript">
+
+        // Se conecta al servicio en el puerto 8080
+        var serviceURL = "http://localhost:8080";
+        var socket = io.connect(serviceURL);
+
+        // Función que actualiza el aviso del agente; si el aviso está vacío es porque los valores son correctos
+        function actualizarAviso(data) {
+            var avisos = document.getElementById("avisos");
+            avisos.innerHTML = data;
+        }
+
+        // Función que actualiza el valor de los sensores tras el mensaje recibido
+        function actualizarSensores(data) {
+            var temperatura = document.getElementById("temperatura");
+            temperatura.innerHTML = data.temperatura + "º C";
+            var luminosidad = document.getElementById("luminosidad");
+            luminosidad.innerHTML = data.luminosidad + " Lux";
+        }
+
+        // Función para subir A/C -> envía un evento "subirAC" al servidor
+        function subirAC() {
+            if (confirm("Subir la temperatura del A/C implicará una subida de la temperatura de la habitación.\n\n¿Estás seguro de que quieres hacerlo?")) {
+                // Si el usuario hace clic en "Sí", se ejecutará este bloque de código
+                socket.emit("subirAC", {});
+                console.log("enviada peticion subirAC");
+            }
+        }
+
+        // Función para bajar A/C -> envía un evento "bajarAC" al servidor
+        function bajarAC() {
+            if (confirm("Bajar la temperatura del A/C implicará una bajada de la temperatura de la habitación.\n\n¿Estás seguro de que quieres hacerlo?")) {
+                // Si el usuario hace clic en "Sí", se ejecutará este bloque de código
+                socket.emit("bajarAC", {});
+                console.log("enviada peticion bajarAC");
+            }
+        }
+
+        // Función para subir la persiana -> envía un evento "subirPersiana" al servidor
+        function subirPersiana() {
+            if (confirm("Subir la persiana implicará una subida de la luminosidad de la habitación.\n\n¿Estás seguro de que quieres hacerlo?")) {
+                // Si el usuario hace clic en "Sí", se ejecutará este bloque de código
+                socket.emit("subirPersiana", {});
+                console.log("enviada peticion subirPersiana");
+            }
+        }
+
+        // Función para bajar la persiana -> envía un evento "bajarPersiana" al servidor
+        function bajarPersiana() {
+            if (confirm("Bajar la persiana implicará una bajada de la luminosidad de la habitación.\n\n¿Estás seguro de que quieres hacerlo?")) {
+                // Si el usuario hace clic en "Sí", se ejecutará este bloque de código
+                socket.emit("bajarPersiana", {});
+                console.log("enviada peticion bajarPersiana");
+            }
+        }
+
+        // Tratamiento de eventos con socket.io
+
+        // Al conectarse, muestra por consola que se ha conectado al servidor
+		socket.on('connect', function(){
+            console.log("Conectado al servicio " + serviceURL);
+		});
+        
+        // Cada vez que se actualicen los sensores, el cliente actualiza su valor
+        socket.on('actualizarSensores', function(data) {
+            // Llamamos la método actualizarSensores que es el encargado de modificar el HTML
+            actualizarSensores(data);
+        });
+
+        // Para recibir mensajes de aviso del agente
+        socket.on("avisosAgente", function(data) {
+            actualizarAviso(data);
+        });
+
+        // Al desconectarse, muestra por consola que se ha desconectado
+		socket.on('disconnect', function(){
+            console.log("Desconectado del servicio " + serviceURL);
+		});
+
+	</script>
+</body>
+</html>

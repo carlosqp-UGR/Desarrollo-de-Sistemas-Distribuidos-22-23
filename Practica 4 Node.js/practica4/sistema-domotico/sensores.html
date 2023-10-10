@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+	<title>Administrador</title>
+	<style>
+		body {
+			background-color: #f2f2f2;
+		}
+
+		.container {
+			display: flex;
+			flex-wrap: wrap;
+            flex-direction: column;
+            flex-basis: 120;
+            align-items: center;
+			justify-content: center;
+            /* max-width: 1200px; */
+		}
+
+		.box {
+            justify-self: center;
+			background-color: #ffffff;
+			border-radius: 10px;
+			box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
+			margin: 20px;
+			padding: 20px;
+			text-align: center;
+			width: 85%;
+		}
+
+		.box h2 {
+			font-size: 24px;
+			margin-bottom: 20px;
+			text-align: center;
+		}
+
+		.box span {
+			font-size: 20px;
+		}
+
+        .sensores {
+            display: flex;
+            flex-direction: column; /* Cambiamos la dirección a columna */
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .sensor {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            border-radius: 5px;
+            background-color: #f2f2f2;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            width: 90%;
+        }
+
+        .sensor label {
+            flex-basis: 50%; /* El 50% del ancho para el label */
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .sensor form {
+            /* flex-basis: %; /* El 40% del ancho para el formulario */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sensor form input {
+            margin-right: 10px; /* Margen derecho para separar el input del botón */
+            font-size: 20px; /* Tamaño de fuente más grande, puedes ajustar el valor según tus necesidades */
+        }
+
+        .sensor form button {
+            flex-grow: 1;
+            margin-right: 10px;
+            flex-basis: 30%; /* El 30% del ancho para el botón */
+            background-color: #4285f4;
+            border: none;
+            border-radius: 5px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 10px 20px;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .sensor form button:hover, .sensor form button:focus {
+            background-color: #1351ad;
+            outline: none;
+        }
+
+        .sensor form button:active {
+            background-color: #0c3873;
+        }
+
+		button {
+			background-color: #4285f4;
+			border: none;
+			border-radius: 5px;
+			color: #ffffff;
+			cursor: pointer;
+			font-size: 18px;
+			margin-top: 10px;
+			padding: 10px 20px;
+			transition: background-color 0.3s ease-in-out;
+		}
+
+		button:hover, button:focus {
+			background-color: #1351ad;
+			outline: none;
+		}
+
+		button:active {
+			background-color: #0c3873;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+        <div class="box">
+            <h2>Sensores</h2>
+            <div class="sensores">
+                <div class="sensor">
+                    <label for="temperatura">Temperatura (°C):</label>
+                    <form id="formTemperatura">
+                        <input type="number" id="temperatura" name="temperatura" value="" required>
+                        <button type="submit" >Cambiar Temperatura</button>
+                    </form>
+                </div>
+                <div class="sensor">
+                    <label for="luminosidad">Luminosidad (Lux):</label>
+                    <form id="formLuminosidad">
+                        <input type="number" id="luminosidad" name="luminosidad" value="" required>
+                        <button type="submit" >Cambiar Luminosidad</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="box">
+			<h2>Avisos del Agente</h2>
+			<span id="avisos"></span>
+		</div>
+
+        <div class="box">
+            <h2>Historial</h2>
+            <div id="historial"></div>
+        </div>
+	</div>
+
+    <!-- Aquí va el script con la lógica de este programa (solo puede cambiar los valores de los sensores)
+    y mostrar el historial de cambios en los sensores (recibe esa informacion de la BD) -->
+    <script src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript">
+
+        // Se conecta al servicio en el puerto 8080
+        var serviceURL = "http://localhost:8080";
+        var socket = io.connect(serviceURL);
+
+        document.getElementById('formTemperatura').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita la recarga de la página para recibir los avisos
+            if (confirm("¿Seguro que desea cambiar la temperatura?")) {
+                // Si el usuario hace clic en "Sí", se ejecutará este bloque de código
+                var input = document.getElementById('temperatura');
+                var valorIntroducido = input.value;
+                socket.emit("cambiarTemperatura", {temperatura: valorIntroducido});
+                console.log("enviada peticion de cambiar la temperatura ");
+            }
+        });
+
+        document.getElementById('formLuminosidad').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita la recarga de la página
+            if (confirm("¿Seguro que desea cambiar la luminosidad?")) {
+                // Si el usuario hace clic en "Sí", se ejecutará este bloque de código
+                var input = document.getElementById('luminosidad');
+                var valorIntroducido = input.value;
+                socket.emit("cambiarLuminosidad", {luminosidad: valorIntroducido});
+                console.log("enviada peticion de cambiar la luminosidad ");
+            }
+        });
+
+        // Función que actualiza el aviso del agente; si el aviso está vacío es porque los valores son correctos
+        function actualizarAviso(data) {
+            var avisos = document.getElementById("avisos");
+            avisos.innerHTML = data;
+        }
+
+        // Función que actualiza el valor de los sensores tras el mensaje recibido
+        function actualizarSensores(data) {
+            var temperatura = document.getElementById("temperatura");
+            temperatura.value = data.temperatura;
+            var luminosidad = document.getElementById("luminosidad");
+            luminosidad.value = data.luminosidad;
+        }
+
+        // Función que actualiza el historial (similar a la función del ejemplo de connections.html)
+        function actualizarHistorial(data) {
+			var listContainer = document.getElementById('historial');
+			listContainer.innerHTML = '';
+			var listElement = document.createElement('ul');
+			listContainer.appendChild(listElement);
+			var num = data.length;
+			for(var i=0; i<num; i++) {
+	            var listItem = document.createElement('li');
+	            // Modificar la siguiente linea con los campos de la base de datos (fecha, temperatura, luminosidad)
+                listItem.innerHTML = "{Fecha: " + data[i].fecha + ", Temperatura:" + data[i].temperatura + " Cº, Luminosidad:" + data[i].luminosidad + " lux}";
+	            listElement.appendChild(listItem);
+	        }
+        }
+
+        /// Tratamiento de eventos con socket.io
+
+        // Al conectarse, muestra por consola que se ha conectado al servidor
+		socket.on('connect', function(){
+            console.log("Conectado al servicio " + serviceURL);
+		});
+        
+        // Cada vez que se actualicen los sensores, el cliente actualiza su valor
+        socket.on('actualizarSensores', function(data) {
+            // Llamamos la método actualizarSensores que es el encargado de modificar el HTML
+            actualizarSensores(data);
+        });
+
+        // Para recibir mensajes de aviso del agente
+        socket.on("avisosAgente", function(data) {
+            actualizarAviso(data);
+        });
+
+        // Para recibir informacion del historial
+        socket.on('actualizarHistorial', function(data) {
+            actualizarHistorial(data);
+        })
+
+        // Al desconectarse, muestra por consola que se ha desconectado
+		socket.on('disconnect', function(){
+            console.log("Desconectado del servicio " + serviceURL);
+		});
+
+	</script>
+</body>
+</html>
